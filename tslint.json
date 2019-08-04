@@ -92,7 +92,7 @@
     "no-void-expression": true,
     "radix": true,
     "prefer-switch": true,
-    "switch-default": true,
+    "switch-default": false,
     "switch-final-break": true,
     "linebreak-style": [
       true,

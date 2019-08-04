@@ -1,43 +1,35 @@
-import * as fragmentShader from "!raw-loader!./shaders/shader.frag";
-import * as vertexShader from "!raw-loader!./shaders/shader.vert";
+import * as gradient from "!!raw-loader!./gradient.png";
 import { mat4 } from "gl-matrix";
+import { Key } from "ts-keycode-enum";
+import { OrthographicCamera } from "./camera/orthographic";
 import { PerspectiveCamera } from "./camera/perspective";
 import { gl } from "./gl";
 import { Rect } from "./rect";
-import { ShaderProgram } from "./ShaderProgram";
+import { MandelbrotShader } from "./shaderPrograms/MandelbrotShader";
 
-class SimpleShader extends ShaderProgram {
-    public vertexPositionLocation: number;
-    public projectionMatrixLocation: number;
-    public modelViewMatrixLocation: number;
-
-    constructor() {
-        super(vertexShader.default, fragmentShader.default);
-        this.vertexPositionLocation = gl.getAttribLocation(this.program, "a_vertex_position");
-        this.projectionMatrixLocation = gl.getUniformLocation(this.program, "u_projection_matrix") as number;
-        this.modelViewMatrixLocation = gl.getUniformLocation(this.program, "u_model_view_matrix") as number;
-    }
-
-    public setProjectionMatrix(matrix: mat4): void {
-        this.use();
-        gl.uniformMatrix4fv(this.projectionMatrixLocation, false, matrix);
-    }
-
-    public setModelViewMatrix(matrix: mat4): void {
-        this.use();
-        gl.uniformMatrix4fv(this.modelViewMatrixLocation, false, matrix);
-    }
-}
-
-const shaderProgram = new SimpleShader();
+const shaderProgram = new MandelbrotShader();
 const rect = new Rect();
-const camera = new PerspectiveCamera((45 * Math.PI) / 180, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 100.0);
-camera.position = [-0.0, 0.0, -6.0];
-shaderProgram.use();
-shaderProgram.setModelViewMatrix(camera.modelViewMatrix);
-shaderProgram.setProjectionMatrix(camera.projectionMatrix);
+let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+const camera = new OrthographicCamera(-aspect, aspect, -1.0, 1.0, 0.0, 100.0);
+let cameraZoom = 1.0;
+
+const keysDown = new Map<string, boolean>();
 
 loop();
+
+document.addEventListener("keydown", (event: KeyboardEvent) => {
+    console.log(event);
+    keysDown.set(event.key, true);
+});
+
+document.addEventListener("keyup", (event: KeyboardEvent) => {
+    console.log(event);
+    keysDown.set(event.key, false);
+});
+window.addEventListener("resize", () => {
+    aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    camera.set(-aspect, aspect, -1.0, 1.0);
+});
 
 function loop(): void {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -46,6 +38,28 @@ function loop(): void {
     gl.depthFunc(gl.LEQUAL);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    if (keysDown.get("=")) {
+        cameraZoom *= 1.01;
+        camera.setZoom(cameraZoom);
+    } else if (keysDown.get("-")) {
+        cameraZoom *= 0.99;
+        camera.setZoom(cameraZoom);
+    }
+    if (keysDown.get("ArrowUp")) {
+        camera.translate([0.0, -0.01 / cameraZoom, 0.0]);
+    } else if (keysDown.get("ArrowDown")) {
+        camera.translate([0.0, 0.01 / cameraZoom, 0.0]);
+    }
+    if (keysDown.get("ArrowLeft")) {
+        camera.translate([0.01 / cameraZoom, 0.0, 0.0]);
+    } else if (keysDown.get("ArrowRight")) {
+        camera.translate([-0.01 / cameraZoom, 0.0, 0.0]);
+    }
+
+    shaderProgram.use();
+    shaderProgram.setModelViewMatrix(camera.modelViewMatrix);
+    shaderProgram.setProjectionMatrix(camera.projectionMatrix);
 
     const numComponents = 2;
     const type = gl.FLOAT;

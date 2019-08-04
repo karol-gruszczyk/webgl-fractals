@@ -26,4 +26,10 @@ export class Camera {
         vec3.add(this.cameraPosition, this.cameraPosition, value);
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, value);
     }
+
+    public setZoom(value: number): void {
+        mat4.identity(this.modelViewMatrix);
+        mat4.scale(this.modelViewMatrix, this.modelViewMatrix, [value, value, value]);
+        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, this.cameraPosition);
+    }
 }

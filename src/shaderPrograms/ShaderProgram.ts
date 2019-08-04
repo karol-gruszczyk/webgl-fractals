@@ -1,4 +1,4 @@
-import { gl } from "./gl";
+import { gl } from "../gl";
 
 export class ShaderProgram {
     private static loadShader(shaderType: GLenum, shaderSource: string): WebGLShader {

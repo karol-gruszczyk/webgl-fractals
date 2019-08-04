@@ -13,8 +13,13 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.glsl$/,
-                use: "raw-loader",
+                test: /\.(png|jpe?g|gif)$/,
+                use: [
+                    {
+                        loader: "file-loader",
+                        options: {},
+                    },
+                ],
             },
         ],
     },
