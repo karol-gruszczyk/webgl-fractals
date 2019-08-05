@@ -7,5 +7,5 @@ varying highp vec4 position;
 
 void main() {
     position = a_vertex_position * 2.0;
-    gl_Position = u_projection_matrix * u_model_view_matrix * position;
+    gl_Position = u_projection_matrix * u_model_view_matrix * a_vertex_position;
 }

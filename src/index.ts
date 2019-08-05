@@ -18,12 +18,10 @@ const keysDown = new Map<string, boolean>();
 loop();
 
 document.addEventListener("keydown", (event: KeyboardEvent) => {
-    console.log(event);
     keysDown.set(event.key, true);
 });
 
 document.addEventListener("keyup", (event: KeyboardEvent) => {
-    console.log(event);
     keysDown.set(event.key, false);
 });
 window.addEventListener("resize", () => {
@@ -40,21 +38,21 @@ function loop(): void {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     if (keysDown.get("=")) {
-        cameraZoom *= 1.01;
+        cameraZoom *= 1.05;
         camera.setZoom(cameraZoom);
     } else if (keysDown.get("-")) {
-        cameraZoom *= 0.99;
+        cameraZoom *= 0.95;
         camera.setZoom(cameraZoom);
     }
     if (keysDown.get("ArrowUp")) {
-        camera.translate([0.0, -0.01 / cameraZoom, 0.0]);
+        camera.translate([0.0, -0.05 / cameraZoom, 0.0]);
     } else if (keysDown.get("ArrowDown")) {
-        camera.translate([0.0, 0.01 / cameraZoom, 0.0]);
+        camera.translate([0.0, 0.05 / cameraZoom, 0.0]);
     }
     if (keysDown.get("ArrowLeft")) {
-        camera.translate([0.01 / cameraZoom, 0.0, 0.0]);
+        camera.translate([0.05 / cameraZoom, 0.0, 0.0]);
     } else if (keysDown.get("ArrowRight")) {
-        camera.translate([-0.01 / cameraZoom, 0.0, 0.0]);
+        camera.translate([-0.05 / cameraZoom, 0.0, 0.0]);
     }
 
     shaderProgram.use();
