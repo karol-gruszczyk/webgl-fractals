@@ -1,17 +1,15 @@
-import * as gradient from "!!raw-loader!./gradient.png";
-import { mat4 } from "gl-matrix";
-import { Key } from "ts-keycode-enum";
-import { OrthographicCamera } from "./camera/orthographic";
-import { PerspectiveCamera } from "./camera/perspective";
+import { vec2 } from "gl-matrix";
 import { gl } from "./gl";
 import { Rect } from "./rect";
 import { MandelbrotShader } from "./shaderPrograms/MandelbrotShader";
 
-const shaderProgram = new MandelbrotShader();
-const rect = new Rect();
 let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-const camera = new OrthographicCamera(-aspect, aspect, -1.0, 1.0, 0.0, 100.0);
 let cameraZoom = 1.0;
+const position = vec2.create();
+
+const shaderProgram = new MandelbrotShader();
+shaderProgram.setAspect(aspect);
+const rect = new Rect();
 
 const keysDown = new Map<string, boolean>();
 
@@ -26,8 +24,13 @@ document.addEventListener("keyup", (event: KeyboardEvent) => {
 });
 window.addEventListener("resize", () => {
     aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    camera.set(-aspect, aspect, -1.0, 1.0);
+    shaderProgram.setAspect(aspect);
 });
+
+function translate(value: number[]): void {
+    vec2.add(position, position, value);
+    shaderProgram.setPosition(position);
+}
 
 function loop(): void {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -35,29 +38,25 @@ function loop(): void {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
     if (keysDown.get("=")) {
         cameraZoom *= 1.05;
-        camera.setZoom(cameraZoom);
+        shaderProgram.setZoom(cameraZoom);
     } else if (keysDown.get("-")) {
         cameraZoom *= 0.95;
-        camera.setZoom(cameraZoom);
+        shaderProgram.setZoom(cameraZoom);
     }
     if (keysDown.get("ArrowUp")) {
-        camera.translate([0.0, -0.05 / cameraZoom, 0.0]);
+        translate([0.0, 0.05 / cameraZoom]);
     } else if (keysDown.get("ArrowDown")) {
-        camera.translate([0.0, 0.05 / cameraZoom, 0.0]);
+        translate([0.0, -0.05 / cameraZoom]);
     }
     if (keysDown.get("ArrowLeft")) {
-        camera.translate([0.05 / cameraZoom, 0.0, 0.0]);
+        translate([-0.05 / cameraZoom, 0.0]);
     } else if (keysDown.get("ArrowRight")) {
-        camera.translate([-0.05 / cameraZoom, 0.0, 0.0]);
+        translate([0.05 / cameraZoom, 0.0]);
     }
-
-    shaderProgram.use();
-    shaderProgram.setModelViewMatrix(camera.modelViewMatrix);
-    shaderProgram.setProjectionMatrix(camera.projectionMatrix);
 
     const numComponents = 2;
     const type = gl.FLOAT;

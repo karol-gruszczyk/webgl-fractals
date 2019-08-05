@@ -1,11 +1,14 @@
-attribute vec4 a_vertex_position;
+precision highp float;
 
-uniform mat4 u_model_view_matrix;
-uniform mat4 u_projection_matrix;
+attribute vec4 aVertexPosition;
 
-varying highp vec4 position;
+uniform float uAspect;
+uniform float uZoom;
+uniform vec2 uCameraPosition;
+
+varying highp vec2 position;
 
 void main() {
-    position = a_vertex_position * 2.0;
-    gl_Position = u_projection_matrix * u_model_view_matrix * a_vertex_position;
+    position = 2.0 * vec2(aVertexPosition.x * uAspect, aVertexPosition.y) / uZoom + uCameraPosition;
+    gl_Position = aVertexPosition;
 }
