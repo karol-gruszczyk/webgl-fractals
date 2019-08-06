@@ -5,17 +5,19 @@ import { gl } from "../gl";
 import { ShaderProgram } from "./ShaderProgram";
 
 export class MandelbrotShader extends ShaderProgram {
-    public vertexPositionLocation: number;
-    public aspectLocation: number;
-    public zoomLocation: number;
-    public positionLocation: number;
+    public vertexPositionLocation: GLint;
+    public aspectLocation: GLint;
+    public zoomLocation: GLint;
+    public positionLocation: GLint;
+    public pixelSizeLocation: GLint;
 
     constructor() {
         super(vertexShader.default, fragmentShader.default);
         this.vertexPositionLocation = gl.getAttribLocation(this.program, "aVertexPosition");
-        this.aspectLocation = gl.getUniformLocation(this.program, "uAspect") as number;
-        this.zoomLocation = gl.getUniformLocation(this.program, "uZoom") as number;
-        this.positionLocation = gl.getUniformLocation(this.program, "uCameraPosition") as number;
+        this.aspectLocation = gl.getUniformLocation(this.program, "uAspect") as GLint;
+        this.zoomLocation = gl.getUniformLocation(this.program, "uZoom") as GLint;
+        this.positionLocation = gl.getUniformLocation(this.program, "uCameraPosition") as GLint;
+        this.pixelSizeLocation = gl.getUniformLocation(this.program, "uPixelSize") as GLint;
         this.use();
         this.setZoom(1.0);
         this.setAspect(1.0);
@@ -31,5 +33,9 @@ export class MandelbrotShader extends ShaderProgram {
 
     public setPosition(position: vec2): void {
         gl.uniform2fv(this.positionLocation, position);
+    }
+
+    public setPixelSize(value: vec2 | number[]): void {
+        gl.uniform2fv(this.pixelSizeLocation, value);
     }
 }
